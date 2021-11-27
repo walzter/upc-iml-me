@@ -233,32 +233,15 @@ def num_col_standardize(df, graph='n'):
     return distributions
 
 
-<<<<<<< HEAD
 #processing the loaded dataframe
-=======
-def safe_calculation(data, perform):
-    try:
-        return perform(data)
-    except:
-        return
-
->>>>>>> c4e38424367b54dfecfbcd8c657405a8b55e10b0
 #
 # Preprocess everythogn
 def preprocess_dataset(dataframe,ohe='n'):
     
     #first we want to separate the target column
     Y_true = (dataframe[label_col].values).reshape(-1,)
-<<<<<<< HEAD
     dataframe = dataframe.drop('class',axis=1,)
     
-=======
-    print(Y_true.shape)
-    dataframe = dataframe.drop(label_col,axis=1,)
-    print(dataframe)
-    print(dataframe.shape)
-
->>>>>>> c4e38424367b54dfecfbcd8c657405a8b55e10b0
     #now we select the numerical columns
     df_nums = dataframe.select_dtypes(include='number')
     print('nums')
@@ -287,21 +270,13 @@ def preprocess_dataset(dataframe,ohe='n'):
         #ohe_fit.get_feature_names_out() #feature names
         ohe_transf = ohe.transform(cat_data).toarray()
         df_ohe = pd.DataFrame(ohe_transf,columns=names)
-<<<<<<< HEAD
         return df_ohe
-=======
->>>>>>> c4e38424367b54dfecfbcd8c657405a8b55e10b0
 
     #now we preprocess the numerical one
     data = df_nums.values
     data_test = data.copy()
     X = ('Unscaled data', data_test)
-<<<<<<< HEAD
     print(data_test)
-=======
-    print(X[1])
-
->>>>>>> c4e38424367b54dfecfbcd8c657405a8b55e10b0
     distributions = [
         ('Unscaled data', X[1]),
         ('standard scaling',
