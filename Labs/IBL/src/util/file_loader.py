@@ -20,10 +20,13 @@ def load_dataset(ds_name="", index=0, path="datasetsCBR"):
 
     # TODO
     # Split x and ys as x_train, y_train, x_test, y_test
+    label_col = ds_train.columns[-1:]
 
     return {
-        'x_train':  ds_train,
-        'x_pred': ds_test
+        'x_train':  ds_train.drop(label_col, axis=1),
+        'y_train':  ds_train[label_col],
+        'x_pred':  ds_test.drop(label_col, axis=1),
+        'y_pred':  ds_test[label_col]
     }
 
 

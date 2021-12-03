@@ -16,12 +16,12 @@ class IBL1(IIBL):
         return
 
     def predict(self, x_pred):
-        sim = []
+        sim = np.zeros(len(self.x_train))
 
-        for i, entry in enumerate(self.x_train):
-            sim[i] = self.sim_func(x_pred, entry)
+        for i in range(0, len(self.x_train)):
+            sim[i] = self.sim_func(x_pred, self.x_train.iloc[i])
 
-        y_pred = self.y_train[np.argmin(sim)]
+        y_pred = self.y_train.iloc[np.argmin(sim)]
 
         self.x_train.append(x_pred)
         self.y_train.append(y_pred)
