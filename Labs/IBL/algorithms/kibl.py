@@ -1,8 +1,9 @@
 import pandas as pd
+import time
 
 from Labs.IBL.utils.file_utils import get_test_and_train_data_for_fold
 from Labs.IBL.utils.distance_metric_utils import get_distance, append_class_to_dist
-from Labs.IBL.utils.voter_utils import voter
+from Labs.IBL.utils.voter_utils import voter_most_voted, voter_modified_plurality, voter_borda_count
 from Labs.IBL.utils.preprocessing_utils import preprocess_data
 
 def kibl(dataset_name, k):
@@ -12,12 +13,13 @@ def kibl(dataset_name, k):
       Step 1.1 - Preprocess (i.e. normalise numerical data) for both test & train
       Step 1.2 - For every test example, call get_distance(q, x) - will return a tuple with all 4 distances
         Step 1.2.1 - Pass all 4 distances and get corresponding class labels - will return a df per test example
-        Step 1.2.2 - [Andrey] Call voter(dist_df, k) to return a (c_euclidean, c_manhattan, c_clark, c_hvdm) per example.
+        Step 1.2.2 - [Andrey] Call voter_<mode>(dist_df, k) to return a (c_euclidean, c_manhattan, c_clark, c_hvdm) per example.
                      Append c_actual column,
                      and append the row to K_prediction_df
       Step 1.3 - You now have a K_prediction_df for 1 fold
     Step 2 - You now have K_prediction_df for all folds. Create 4 confusion matrices fo the 4 distance types
     '''
+    start = time.time()
     print('Classifying with K =', k)
     K_prediction_df = pd.DataFrame({'c_euclidean': [], 'c_manhattan': [], 'c_clark': [], 'c_hvdm': []})
     for fold_num in range(0, 10):
@@ -37,12 +39,15 @@ def kibl(dataset_name, k):
             q_df = pd.concat([q_df, q.to_frame().T])
             e, m, c, h = get_distance(x_train_wo_labels, q_df, meta)
             dist_df = append_class_to_dist(e, m, c, h, x_train)
-            c_e, c_m, c_c, c_h = voter(dist_df, k)  # TODO Andrey
-            temp_df = pd.DataFrame([[c_e, c_m, c_c, c_h, x_test.loc[index].values[-1]]],
+            mv_c_e, mv_c_m, mv_c_c, mv_c_h = voter_most_voted(dist_df, k)
+            borda_c_e, borda_c_m, borda_c_c, borda_c_h = voter_borda_count(dist_df, k)
+            # TODO use results by Borda Count and implement modified plurality
+            temp_df = pd.DataFrame([[mv_c_e, mv_c_m, mv_c_c, mv_c_h, x_test.loc[index].values[-1]]],
                                    columns=['c_euclidean', 'c_manhattan', 'c_clark', 'c_hvdm', 'c_actual'])
             K_prediction_df = pd.concat([temp_df, K_prediction_df])
         # print('Size of pred DF at end of fold', fold_num, ' = ', len(K_prediction_df))
-    return K_prediction_df
+    end = time.time()
+    return K_prediction_df, (end - start)
 
 
 def evaluate_performance(K_prediction_df):
