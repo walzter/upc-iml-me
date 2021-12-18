@@ -37,10 +37,6 @@ def get_distance(x, q, meta):
 
         missing_val_indices_in_query = np.argwhere(pd.isnull(q_num_values[0]))
 
-        # Calculating HVDM distance - TODO
-        # for row_num in range(0, len(x)):
-        #    numerical_hvdm_dist[row_num] = np.sum(abs(x_num_values[row_num] - q_num_values[0]))
-
         # Calculating all 4 distances
         for row_num in range(0, len(x)):
             missing_val_indices_in_train = np.argwhere(pd.isnull(x_num_values[row_num]))  # indexof missing feature value in that row/exaple
@@ -50,10 +46,12 @@ def get_distance(x, q, meta):
                     numerical_manhattan_dist[row_num] += 1
                     numerical_euclidean_dist[row_num] += 1
                     numerical_clark_dist[row_num] += 1
+                    numerical_hvdm_dist[row_num] += 1
                 elif feature_ind not in missing_val_indices_in_train and feature_ind not in missing_val_indices_in_query:
                     numerical_manhattan_dist[row_num] += abs(x_num_values[row_num][feature_ind] - q_num_values[0][feature_ind])
                     numerical_euclidean_dist[row_num] += ((x_num_values[row_num][feature_ind] - q_num_values[0][feature_ind]) ** 2)
                     numerical_clark_dist[row_num] += ((abs(x_num_values[row_num][feature_ind] - q_num_values[0][feature_ind]) ** 2) / (abs(x_num_values[row_num][feature_ind] + q_num_values[0][feature_ind]) ** 2))
+                    numerical_hvdm_dist[row_num] += 0 # TODO
             numerical_euclidean_dist[row_num] = np.sqrt(numerical_euclidean_dist[row_num])
 
 
