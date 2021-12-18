@@ -15,8 +15,15 @@ def voter_most_voted(dist_df, k):
   return c_e, c_m, c_c, c_h
 
 def voter_modified_plurality(dist_df, k):
-  # TODO
-  return 0, 0, 0, 0
+  return compute_modified_plurality(dist_df, k, 'euclidean_distance'), compute_modified_plurality(dist_df, k, 'manhattan_distance'), compute_modified_plurality(dist_df, k, 'clark_distance'), compute_modified_plurality(dist_df, k, 'hvdm_distance')
+
+def compute_modified_plurality(dist_df, k, distance_metric):
+  k_classes = dist_df.sort_values(distance_metric).head(k)['class'].values
+  sorted_count = sorted(Counter(k_classes).items(), key=lambda x: x[1], reverse=True)
+  if (k > 1 and len(sorted_count) > 1 and sorted_count[0][1] == sorted_count[1][1]):
+    return compute_modified_plurality(dist_df, k-1, distance_metric)
+  else:
+    return sorted_count[0][0]
 
 def voter_borda_count(dist_df, k):
   e_classes = dist_df.sort_values('euclidean_distance').head(k)['class'].values
