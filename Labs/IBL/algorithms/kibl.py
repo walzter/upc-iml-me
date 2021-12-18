@@ -6,7 +6,7 @@ from Labs.IBL.utils.distance_metric_utils import get_distance, append_class_to_d
 from Labs.IBL.utils.voter_utils import voter_most_voted, voter_modified_plurality, voter_borda_count
 from Labs.IBL.utils.preprocessing_utils import preprocess_data
 
-def kibl(dataset_name, k):
+def kibl(dataset_name, k, voting_protocol):
     '''
     Step 0 - Initialise K_prediction_df as an empty DataFrame
     Step 1 - For every fold, read test & train
@@ -39,15 +39,21 @@ def kibl(dataset_name, k):
             q_df = pd.concat([q_df, q.to_frame().T])
             e, m, c, h = get_distance(x_train_wo_labels, q_df, meta)
             dist_df = append_class_to_dist(e, m, c, h, x_train)
-            mv_c_e, mv_c_m, mv_c_c, mv_c_h = voter_most_voted(dist_df, k)
-            borda_c_e, borda_c_m, borda_c_c, borda_c_h = voter_borda_count(dist_df, k)
-            # TODO use results by Borda Count and implement modified plurality
-            temp_df = pd.DataFrame([[mv_c_e, mv_c_m, mv_c_c, mv_c_h, x_test.loc[index].values[-1]]],
+
+            if (voting_protocol == 'modified_plurality'):
+                final_class_e, final_class_m, final_class_c, final_class_h = voter_modified_plurality(dist_df, k)
+            elif (voting_protocol == 'borda_count'):
+                final_class_e, final_class_m, final_class_c, final_class_h = voter_borda_count(dist_df, k)
+            else:
+                # Apply the simplest voting algo of most votes by default
+                final_class_e, final_class_m, final_class_c, final_class_h = voter_most_voted(dist_df, k)
+
+            temp_df = pd.DataFrame([[final_class_e, final_class_m, final_class_c, final_class_h, x_test.loc[index].values[-1]]],
                                    columns=['c_euclidean', 'c_manhattan', 'c_clark', 'c_hvdm', 'c_actual'])
             K_prediction_df = pd.concat([temp_df, K_prediction_df])
         # print('Size of pred DF at end of fold', fold_num, ' = ', len(K_prediction_df))
     end = time.time()
-    return K_prediction_df, (end - start)
+    return K_prediction_df, "{:.2f}".format((end - start)) + "s"
 
 
 def evaluate_performance(K_prediction_df):
@@ -77,4 +83,4 @@ def evaluate_performance(K_prediction_df):
             correct_count += 1
     h_perf = (correct_count * 100) / len(K_prediction_df)
 
-    return e_perf, m_perf, c_perf, h_perf
+    return "{:.2f}".format(e_perf), "{:.2f}".format(m_perf), "{:.2f}".format(c_perf), "{:.2f}".format(h_perf)
