@@ -40,7 +40,7 @@ def select_features(orig_data_df, selection_method, threshold_or_no_of_features)
 
   X = transformed_data_df[:, :len(transformed_data_df[0]) - 1]
   Y = transformed_data_df[:, len(transformed_data_df[0]) - 1]
-  if (selection_method == 'variance_selection'):
+  if (selection_method == 'variance_threshold'):
     selector = VarianceThreshold(threshold = threshold_or_no_of_features)
     sel = selector.fit(X)
     sel_index = sel.get_support()
