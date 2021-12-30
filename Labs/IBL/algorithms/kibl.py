@@ -6,7 +6,7 @@ from Labs.IBL.utils.distance_metric_utils import get_distance, append_class_to_d
 from Labs.IBL.utils.voter_utils import voter_most_voted, voter_modified_plurality, voter_borda_count
 from Labs.IBL.utils.preprocessing_utils import preprocess_data, select_features, prune_non_essential_features
 
-def kibl(dataset_name, k, voting_protocol, feature_selection_enabled, feature_selection_method, no_of_features):
+def kibl(dataset_name, k, voting_protocol, feature_selection_enabled, feature_selection_method, threshold_or_no_of_features):
     '''
     Step 0 - Initialise K_prediction_df as an empty DataFrame
     Step 1 - For every fold, read test & train
@@ -37,7 +37,7 @@ def kibl(dataset_name, k, voting_protocol, feature_selection_enabled, feature_se
             if features_already_selected:
                 x_train, x_test = prune_non_essential_features(x_train, x_test, selected_features)
             else:
-                selected_features = select_features(x_train, feature_selection_method, no_of_features)
+                selected_features = select_features(x_train, feature_selection_method, threshold_or_no_of_features)
                 x_train, x_test = prune_non_essential_features(x_train, x_test, selected_features)
                 features_already_selected = True
 

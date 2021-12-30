@@ -1,7 +1,7 @@
 from sklearn import preprocessing
 import pandas as pd
 import numpy as np
-from sklearn.feature_selection import RFE
+from sklearn.feature_selection import RFE, VarianceThreshold
 from sklearn.svm import LinearSVC
 from sklearn.preprocessing import OrdinalEncoder
 from sklearn.impute import SimpleImputer
@@ -29,24 +29,27 @@ def preprocess_data(orig_data_df, meta):
   else:
     return orig_data_df
 
-def select_features(orig_data_df, selection_method, no_of_features):
-  if (selection_method == 'info_gain'):
-    # TODO
-    return None
+def select_features(orig_data_df, selection_method, threshold_or_no_of_features):
+  oe = OrdinalEncoder()
+  oe.fit(orig_data_df)
+  transformed_data_df = oe.transform(orig_data_df)
+
+  imp = SimpleImputer(missing_values=np.nan, strategy='mean')
+  imp = imp.fit(transformed_data_df)
+  transformed_data_df = imp.transform(transformed_data_df)
+
+  X = transformed_data_df[:, :len(transformed_data_df[0]) - 1]
+  Y = transformed_data_df[:, len(transformed_data_df[0]) - 1]
+  if (selection_method == 'variance_selection'):
+    selector = VarianceThreshold(threshold = threshold_or_no_of_features)
+    sel = selector.fit(X)
+    sel_index = sel.get_support()
+    selected_features = [orig_data_df.columns[i] for i in (sel_index == True).nonzero()][0].values
+    return selected_features
   elif (selection_method == 'rfe'):
-    oe = OrdinalEncoder()
-    oe.fit(orig_data_df)
-    transformed_data_df = oe.transform(orig_data_df)
-
-    imp = SimpleImputer(missing_values=np.nan, strategy='mean')
-    imp = imp.fit(transformed_data_df)
-    transformed_data_df = imp.transform(transformed_data_df)
-
-    X = transformed_data_df[:,:len(transformed_data_df[0])-1]
-    Y = transformed_data_df[:,len(transformed_data_df[0])-1]
     svc = LinearSVC(max_iter = 10000)
     svc.fit(X, Y)
-    selector = RFE(svc, n_features_to_select = no_of_features, step = 1)
+    selector = RFE(svc, n_features_to_select = threshold_or_no_of_features, step = 1)
     selector = selector.fit(X, Y)
     selected_features = [orig_data_df.columns[i] for i in (selector.support_ == True).nonzero()][0].values
     return selected_features
