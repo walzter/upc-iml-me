@@ -1,4 +1,6 @@
 import time
+import tqdm
+from tqdm import tqdm
 
 def cross_val(ds_list, algorithm, train_method, pred_method):
     perms = 0
@@ -32,7 +34,7 @@ def cross_val(ds_list, algorithm, train_method, pred_method):
             y_pred = ds_list[j]['y_pred']
             correct_predictions = 0
             start = time.time()
-            for predict_index in range(len(x_pred)):
+            for predict_index in tqdm(range(len(x_pred))):
                 #print(f'pred ind: {predict_index}')
                 #print(f'{to_predict}')
                 #print(f'{x_pred.iloc[0]}')
