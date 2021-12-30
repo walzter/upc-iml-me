@@ -40,8 +40,8 @@ def ibl3(filename):
     df.to_csv(f'./logs/{filename}.{algorithm}.times.csv')
 
 def iblflow():
-    # used soybean, credit-a,
-    filename = 'credit-a'
+    # used soybean, credit-a, satimage
+    filename = 'soybean'
     ibl1(filename)
     ibl2(filename)
     ibl3(filename)
