@@ -8,6 +8,7 @@ class IBL1(IIBL):
         self.sim_func = sim_func
         self.x_train = None
         self.y_train = None
+        self.cd = None
 
     def fit(self, x_train, y_train):
         self.x_train = x_train
@@ -22,8 +23,5 @@ class IBL1(IIBL):
             sim[i] = self.sim_func(x_pred, self.x_train.iloc[i])
 
         y_pred = self.y_train[np.argmin(sim)]
-
-        #self.x_train.append(x_pred)
-        #self.y_train.append(y_pred)
 
         return y_pred
