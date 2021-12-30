@@ -4,9 +4,9 @@ import time
 from Labs.IBL.utils.file_utils import get_test_and_train_data_for_fold
 from Labs.IBL.utils.distance_metric_utils import get_distance, append_class_to_dist
 from Labs.IBL.utils.voter_utils import voter_most_voted, voter_modified_plurality, voter_borda_count
-from Labs.IBL.utils.preprocessing_utils import preprocess_data
+from Labs.IBL.utils.preprocessing_utils import preprocess_data, select_features, prune_non_essential_features
 
-def kibl(dataset_name, k, voting_protocol):
+def kibl(dataset_name, k, voting_protocol, feature_selection_enabled, feature_selection_method, threshold_or_no_of_features):
     '''
     Step 0 - Initialise K_prediction_df as an empty DataFrame
     Step 1 - For every fold, read test & train
@@ -20,6 +20,8 @@ def kibl(dataset_name, k, voting_protocol):
     Step 2 - You now have K_prediction_df for all folds. Create 4 confusion matrices fo the 4 distance types
     '''
     start = time.time()
+    features_already_selected = False
+    selected_features = None
     print('Classifying with K =', k)
     K_prediction_df = pd.DataFrame({'c_euclidean': [], 'c_manhattan': [], 'c_clark': [], 'c_hvdm': []})
     for fold_num in range(0, 10):
@@ -30,6 +32,15 @@ def kibl(dataset_name, k, voting_protocol):
         x_train = preprocess_data(x_train, meta)
         x_test = preprocess_data(x_test, meta)
 
+        # Optional feature selection
+        if feature_selection_enabled:
+            if features_already_selected:
+                x_train, x_test = prune_non_essential_features(x_train, x_test, selected_features)
+            else:
+                selected_features = select_features(x_train, feature_selection_method, threshold_or_no_of_features)
+                x_train, x_test = prune_non_essential_features(x_train, x_test, selected_features)
+                features_already_selected = True
+
         x_train_wo_labels = x_train.drop(list(x_train)[-1], axis=1)
         x_test_wo_labels = x_test.drop(list(x_test)[-1], axis=1)
         # print('# of samples in train =', len(x_train_wo_labels), ', test =', len(x_test_wo_labels))
@@ -37,7 +48,7 @@ def kibl(dataset_name, k, voting_protocol):
         for index, q in x_test_wo_labels.iterrows():
             q_df = pd.DataFrame()
             q_df = pd.concat([q_df, q.to_frame().T])
-            e, m, c, h = get_distance(x_train_wo_labels, q_df, meta)
+            e, m, c, h = get_distance(x_train_wo_labels, q_df, meta, feature_selection_enabled, selected_features)
             dist_df = append_class_to_dist(e, m, c, h, x_train)
 
             if (voting_protocol == 'modified_plurality'):

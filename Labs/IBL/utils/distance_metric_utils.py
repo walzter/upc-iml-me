@@ -4,7 +4,7 @@ import pandas as pd
 np.seterr(divide='ignore', invalid='ignore')
 
 
-def get_distance(x, q, meta):
+def get_distance(x, q, meta, feature_selection_enabled, selected_features):
     '''
     x = training examples; type DataFrame
     q = query example; type DataFrame
@@ -18,6 +18,11 @@ def get_distance(x, q, meta):
     # First, divide each DF to 2 DFs - numerical only and categorical only
     numerical_col_names = [meta.names()[:-1][i] for i in [index for index, type in enumerate(meta.types()[:-1]) if type == 'numeric']]
     categorical_col_names = [meta.names()[:-1][i] for i in [index for index, type in enumerate(meta.types()[:-1]) if type == 'nominal']]
+
+    if feature_selection_enabled:
+        numerical_col_names = list(set(numerical_col_names) & set(selected_features))
+        categorical_col_names = list(set(categorical_col_names) & set(selected_features))
+
     x_numerical = x.drop(categorical_col_names, axis=1)
     x_categorical = x.drop(numerical_col_names, axis=1)
     q_numerical = q.drop(categorical_col_names, axis=1)
