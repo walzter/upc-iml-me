@@ -64,7 +64,7 @@ def kibl(dataset_name, k, voting_protocol, feature_selection_enabled, feature_se
             K_prediction_df = pd.concat([temp_df, K_prediction_df])
         # print('Size of pred DF at end of fold', fold_num, ' = ', len(K_prediction_df))
     end = time.time()
-    return K_prediction_df, "{:.2f}".format((end - start)) + "s"
+    return K_prediction_df, (end - start)
 
 
 def evaluate_performance(K_prediction_df):
@@ -94,4 +94,4 @@ def evaluate_performance(K_prediction_df):
             correct_count += 1
     h_perf = (correct_count * 100) / len(K_prediction_df)
 
-    return "{:.2f}".format(e_perf), "{:.2f}".format(m_perf), "{:.2f}".format(c_perf), "{:.2f}".format(h_perf)
+    return [e_perf, m_perf, c_perf, h_perf]
